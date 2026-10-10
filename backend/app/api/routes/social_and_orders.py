@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from typing import Optional
 from sqlalchemy.orm import Session
 from datetime import datetime, date
-from app.core.database import get_db
+from app.core.tenant import get_db_for_request
 from app.core.security import get_current_user
 from app.crud.crud import (
     create_post, get_posts, get_post, update_post, publish_post, delete_post,
@@ -22,7 +22,7 @@ router_posts = APIRouter(prefix="/api/posts", tags=["Social Posts"])
 
 
 @router_posts.post("", response_model=PostOut)
-def create_new_post(post: PostCreate, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
+def create_new_post(post: PostCreate, db: Session = Depends(get_db_for_request), current_user=Depends(get_current_user)):
     """Create a new post for social media"""
     return create_post(db, post)
 
@@ -32,7 +32,7 @@ def list_posts(
     status: Optional[str] = None,
     skip: int = 0,
     limit: int = 50,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db_for_request),
     current_user=Depends(get_current_user)
 ):
     """List all posts with optional status filter"""
@@ -40,7 +40,7 @@ def list_posts(
 
 
 @router_posts.get("/{post_id}", response_model=PostOut)
-def get_one_post(post_id: int, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
+def get_one_post(post_id: int, db: Session = Depends(get_db_for_request), current_user=Depends(get_current_user)):
     """Get a specific post by ID"""
     post = get_post(db, post_id)
     if not post:
@@ -49,7 +49,7 @@ def get_one_post(post_id: int, db: Session = Depends(get_db), current_user=Depen
 
 
 @router_posts.put("/{post_id}", response_model=PostOut)
-def edit_post(post_id: int, post: PostUpdate, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
+def edit_post(post_id: int, post: PostUpdate, db: Session = Depends(get_db_for_request), current_user=Depends(get_current_user)):
     """Update a post"""
     updated = update_post(db, post_id, post)
     if not updated:
@@ -58,7 +58,7 @@ def edit_post(post_id: int, post: PostUpdate, db: Session = Depends(get_db), cur
 
 
 @router_posts.post("/{post_id}/publish")
-def publish_one_post(post_id: int, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
+def publish_one_post(post_id: int, db: Session = Depends(get_db_for_request), current_user=Depends(get_current_user)):
     """Publish a post to all social media platforms"""
     published = publish_post(db, post_id)
     if not published:
@@ -67,7 +67,7 @@ def publish_one_post(post_id: int, db: Session = Depends(get_db), current_user=D
 
 
 @router_posts.delete("/{post_id}")
-def remove_post(post_id: int, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
+def remove_post(post_id: int, db: Session = Depends(get_db_for_request), current_user=Depends(get_current_user)):
     """Delete a post"""
     deleted = delete_post(db, post_id)
     if not deleted:
@@ -81,7 +81,7 @@ router_orders = APIRouter(prefix="/api/orders", tags=["Client Orders"])
 
 
 @router_orders.post("", response_model=ClientOrderOut)
-def create_order(order: ClientOrderCreate, db: Session = Depends(get_db)):
+def create_order(order: ClientOrderCreate, db: Session = Depends(get_db_for_request)):
     """Create a new client order (public endpoint - no auth required)"""
     try:
         return create_client_order(db, order)
@@ -96,7 +96,7 @@ def list_orders(
     end_date: Optional[date] = None,
     skip: int = 0,
     limit: int = 50,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db_for_request),
     current_user=Depends(get_current_user)
 ):
     """List all client orders (admin only) with optional status/date filters"""
@@ -104,7 +104,7 @@ def list_orders(
 
 
 @router_orders.get("/{order_id}", response_model=ClientOrderOut)
-def get_order(order_id: int, db: Session = Depends(get_db)):
+def get_order(order_id: int, db: Session = Depends(get_db_for_request)):
     """Get order by ID"""
     order = get_client_order(db, order_id)
     if not order:
@@ -113,7 +113,7 @@ def get_order(order_id: int, db: Session = Depends(get_db)):
 
 
 @router_orders.get("/number/{order_number}", response_model=ClientOrderOut)
-def get_order_by_number(order_number: str, db: Session = Depends(get_db)):
+def get_order_by_number(order_number: str, db: Session = Depends(get_db_for_request)):
     """Track order by order number"""
     order = get_client_order_by_number(db, order_number)
     if not order:
@@ -125,7 +125,7 @@ def get_order_by_number(order_number: str, db: Session = Depends(get_db)):
 def update_order_status(
     order_id: int,
     status: str,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db_for_request),
     current_user=Depends(get_current_user)
 ):
     """Update order status"""
@@ -147,7 +147,7 @@ def update_order_status(
 def update_tracking(
     order_id: int,
     tracking_number: str,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db_for_request),
     current_user=Depends(get_current_user)
 ):
     """Update order tracking number"""
@@ -165,7 +165,7 @@ router_social_settings = APIRouter(prefix="/api/settings/social", tags=["Social 
 @router_social_settings.put("")
 def update_social_settings(
     data: SocialSettingsUpdate,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db_for_request),
     current_user=Depends(get_current_user)
 ):
     """Update social media platform credentials"""
@@ -201,7 +201,7 @@ router_public = APIRouter(prefix="/api/public", tags=["Public Website"])
 
 
 @router_public.get("/posts", response_model=list[PostOut])
-def get_public_posts(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
+def get_public_posts(skip: int = 0, limit: int = 10, db: Session = Depends(get_db_for_request)):
     """Get published posts for website display"""
     from app.models.models import PostStatus
     posts = db.query(Post).filter(
@@ -212,7 +212,7 @@ def get_public_posts(skip: int = 0, limit: int = 10, db: Session = Depends(get_d
 
 
 @router_public.get("/settings")
-def get_public_settings(db: Session = Depends(get_db)):
+def get_public_settings(db: Session = Depends(get_db_for_request)):
     """Get public settings for website"""
     from app.crud.crud import get_settings as get_settings_crud
     settings = get_settings_crud(db)
@@ -234,7 +234,7 @@ def get_public_products(
     category_id: Optional[int] = Query(None),
     skip: Optional[int] = 0,
     limit: Optional[int] = 200,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db_for_request)
 ):
     """Get all products for public website (no auth required)"""
     q = db.query(Product).filter(Product.status == True)
@@ -250,6 +250,6 @@ def get_public_products(
 
 
 @router_public.get("/categories", response_model=list[CategoryOut])
-def get_public_categories(db: Session = Depends(get_db)):
+def get_public_categories(db: Session = Depends(get_db_for_request)):
     """Get all categories for public website (no auth required)"""
     return db.query(Category).filter(Category.status == True).all()

@@ -20,6 +20,9 @@ from app.api.routes.routes import (
 from app.api.routes.social_and_orders import (
     router_posts, router_orders, router_social_settings, router_public
 )
+from app.core.master_database import master_engine, MasterBase
+from app.master_models import *  # noqa - registers master models
+from app.api.routes.clients import router as router_clients
 from app.core.security import get_password_hash
 from app.core.database import SessionLocal
 from app.models.models import User, UserRole, Setting
@@ -58,11 +61,15 @@ app.include_router(router_posts)
 app.include_router(router_orders)
 app.include_router(router_social_settings)
 app.include_router(router_public)
+app.include_router(router_clients)
 
 
 @app.on_event("startup")
 def startup():
+    # create tenant schema (used for individual client DBs when created)
     Base.metadata.create_all(bind=engine)
+    # create master DB tables (clients registry)
+    MasterBase.metadata.create_all(bind=master_engine)
     db = SessionLocal()
     try:
         admin = db.query(User).filter(User.username == "admin").first()

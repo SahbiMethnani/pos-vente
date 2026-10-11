@@ -4,12 +4,15 @@ import { Toaster } from 'react-hot-toast'
 import { store } from './store/store'
 import Layout from './components/layout/Layout'
 import LoginPage from './pages/LoginPage'
+import ClientRegisterPage from './pages/ClientRegisterPage'
+import PODashboardPage from './pages/PODashboardPage'
 import DashboardPage from './pages/DashboardPage'
 import CaissePage from './pages/CaissePage'
 import ProduitsPage from './pages/ProduitsPage'
 import SocialMediaPage from './pages/SocialMediaPage'
 import WebsitePage from './pages/WebsitePage'
 import OrdersPage from './pages/OrdersPage'
+import AdminUsersPage from './pages/AdminUsersPage'
 import PublicHomePage from './pages/PublicHomePage'
 import { CategoriesPage, StockPage, CustomersPage, SuppliersPage } from './pages/OtherPages'
 import { VentesPage, RapportsPage, ParametresPage } from './pages/SalesAndMore'
@@ -25,6 +28,8 @@ function AppRoutes() {
         
         {/* 🌐 Routes Publiques (sans authentification) */}
         <Route path="/shop" element={<WebsitePage />} />
+        <Route path="/register" element={<ClientRegisterPage />} />
+        <Route path="/po" element={<PODashboardPage />} />
         <Route path="/login" element={token ? <Navigate to="/admin" replace /> : <LoginPage />} />
         
         {/* 🔐 Routes Admin (avec authentification) */}
@@ -35,6 +40,7 @@ function AppRoutes() {
           <Route index element={<DashboardPage />} />
           <Route path="caisse" element={<CaissePage />} />
           <Route path="produits" element={<ProduitsPage />} />
+          <Route path="users" element={<AdminUsersPage />} />
           <Route path="categories" element={<CategoriesPage />} />
           <Route path="stock" element={<StockPage />} />
           <Route path="clients" element={<CustomersPage />} />

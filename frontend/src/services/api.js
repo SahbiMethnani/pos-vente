@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const BACKEND_URL = (import.meta.env.VITE_API_URL || 'http://localhost:8000').replace(/\/$/, '')
+const BACKEND_URL = (import.meta.env.VITE_API_URL).replace(/\/$/, '')
 const baseURL = import.meta.env.VITE_API_URL ? `${BACKEND_URL}/api` : '/api'
 
 const api = axios.create({
@@ -24,6 +24,11 @@ api.interceptors.request.use((config) => {
   if (token) {
     config.headers = config.headers || {}
     config.headers.Authorization = `Bearer ${token}`
+  }
+  const clientId = localStorage.getItem('pos_client_id')
+  if (clientId) {
+    config.headers = config.headers || {}
+    config.headers['X-Client-Id'] = clientId
   }
   return config
 })

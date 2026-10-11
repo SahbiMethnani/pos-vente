@@ -8,6 +8,7 @@ import { Store, Eye, EyeOff } from 'lucide-react'
 
 export default function LoginPage() {
   const [form, setForm] = useState({ username: '', password: '' })
+  const [clientId, setClientId] = useState(localStorage.getItem('pos_client_id') || '')
   const [showPwd, setShowPwd] = useState(false)
   const [loading, setLoading] = useState(false)
   const dispatch = useDispatch()
@@ -17,6 +18,8 @@ export default function LoginPage() {
     e.preventDefault()
     setLoading(true)
     try {
+      // store client id in localStorage so api adds X-Client-Id header
+      if (clientId) localStorage.setItem('pos_client_id', clientId)
       const { data } = await api.post('/auth/login', form)
       dispatch(setAuth({ user: data.user, token: data.access_token }))
       navigate('/admin')
@@ -47,6 +50,15 @@ export default function LoginPage() {
               value={form.username}
               onChange={(e) => setForm({ ...form, username: e.target.value })}
               required
+            />
+          </div>
+          <div>
+            <label className="label">Client ID (optionnel)</label>
+            <input
+              className="input"
+              placeholder="X-Client-Id"
+              value={clientId}
+              onChange={(e) => setClientId(e.target.value)}
             />
           </div>
           <div>

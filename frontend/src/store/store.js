@@ -35,6 +35,7 @@ const authSlice = createSlice({
       state.token = null
       localStorage.removeItem('pos_token')
       localStorage.removeItem('pos_user')
+      localStorage.removeItem('pos_client_id')
     },
   },
 })

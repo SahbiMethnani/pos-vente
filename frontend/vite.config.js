@@ -7,7 +7,7 @@ export default defineConfig({
     port: 5173,
     proxy: {
       '/api': {
-        target: 'http://localhost:8000',
+        target: 'https://pos-vente-api.onrender.com',
         changeOrigin: true,
       }
     }
